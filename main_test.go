@@ -1,11 +1,14 @@
 package go_convex_hull_2d
 
-import "testing"
+import (
+	"testing"
+	"fmt"
+)
 
 func TestConvexHull (t *testing.T) {
 	points := toPoints([]float64{0,0,1,1,1,0,0.5,0.5,0.7,0.1})
 	convexHull := ComputeConvexHull(points)
-	compareConvexHulls(t, convexHull, toPoints([]float64{0, 0, 1, 1, 1, 0}))
+	compareConvexHulls(t, convexHull, toPoints([]float64{0, 0, 1, 0, 1, 1}))
 }
 
 func compareConvexHulls (t *testing.T, actualC, expectedC []Point) {
@@ -21,6 +24,7 @@ func compareConvexHulls (t *testing.T, actualC, expectedC []Point) {
 		x1, y1 := p1.getCoordinates()
 		x2, y2 := p2.getCoordinates()
 		if ( x1 != x2 || y1 != y2) {
+			fmt.Println(actualC, expectedC)
 			t.Errorf("%d th point of the convex hull was not correct, got: %+v want: %+v", i, p1, p2)
 		}
 	}
