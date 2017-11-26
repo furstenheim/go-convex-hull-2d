@@ -25,14 +25,14 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 	}
 	var w sync.WaitGroup
 	var lower = points[:2]
-	var upper = points[len(points) - 2]
+	var upper = points[len(points)-2]
 	// Run lower and upper parts in parallel
 	w.Add(2)
 	// lower part
-	go func () {
+	go func() {
 		for _, p := range points[2:] {
 			m := len(lower)
-			for m>1 && !isOrientationPositive (lower[m -2], lower[m-1], p){
+			for m > 1 && !isOrientationPositive(lower[m-2], lower[m-1], p) {
 				m -= 1
 				lower = lower[:m-1]
 			}
@@ -41,11 +41,11 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 		w.Done()
 	}()
 	// upper part
-	go func () {
-		for i:= len(points) - 3; i>= 0; i-- {
+	go func() {
+		for i := len(points) - 3; i >= 0; i-- {
 			p := points[i]
 			m := len(upper)
-			for m>1 && !isOrientationPositive (upper[m - 2], upper[m - 1], p){
+			for m > 1 && !isOrientationPositive(upper[m-2], upper[m-1], p) {
 				m -= 1
 				upper = upper[:m-1]
 			}
@@ -55,19 +55,19 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 	}()
 	w.Wait()
 	// End points are duplicated
-	upper = upper[:len(upper) -1]
-	lower = lower[:len(lower) -1]
+	upper = upper[:len(upper)-1]
+	lower = lower[:len(lower)-1]
 	return append(upper, lower...)
 }
 
-func isOrientationPositive (p1, p2, p3 Point) (isPositive bool){
+func isOrientationPositive(p1, p2, p3 Point) (isPositive bool) {
 	x1, y1 := p1.getCoordinates()
 	x2, y2 := p2.getCoordinates()
 	x3, y3 := p3.getCoordinates()
 	// compute determinant to obtain the orientation
 	// |x1 - x3 x2 - x3 |
 	// |y1 - y3 y2 - y3 |
-	return (x1 - x3)*(y2- y3) - (y1 - y3) * (x2 - x3) >= 0
+	return (x1-x3)*(y2-y3)-(y1-y3)*(x2-x3) >= 0
 }
 
 type pointSorter []Point
