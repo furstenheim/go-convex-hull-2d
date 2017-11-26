@@ -28,8 +28,8 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 	var w sync.WaitGroup
 	log.Println("Starting convex hull")
 	// Run lower and upper parts in parallel
-	var lower = points[:2]
-	var upper = points[len(points)-2:]
+	var lower = []Point{points[0], points[1]}
+	var upper = []Point{points[len(points)- 1], points[len(points)-2]}
 	w.Add(2)
 	// lower part
 	go func() {
@@ -90,7 +90,7 @@ func isOrientationPositive(p1, p2, p3 Point) (isPositive bool) {
 	// compute determinant to obtain the orientation
 	// |x1 - x3 x2 - x3 |
 	// |y1 - y3 y2 - y3 |
-	return (x1-x3)*(y2-y3)-(y1-y3)*(x2-x3) >= 0
+	return (x1-x3)*(y2-y3)-(y1-y3)*(x2-x3) > 0
 }
 
 type pointSorter []Point
