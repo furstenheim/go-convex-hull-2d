@@ -5,6 +5,8 @@ package go_convex_hull_2d
 import (
 	"sort"
 	"sync"
+	"log"
+	"fmt"
 )
 
 type Point interface {
@@ -14,7 +16,7 @@ type Point interface {
 // Given an array of Points it computes the convex hull
 func ComputeConvexHull(points []Point) []Point {
 	sort.Sort(pointSorter(points))
-	return ComputeConvexHull(points)
+	return ComputeConvexHullOnSortedArray(points)
 }
 
 // Given an array of Points ordered lexicographically by (x,y) it computes the convex hull
@@ -24,19 +26,25 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 		return points
 	}
 	var w sync.WaitGroup
-	var lower = points[:2]
-	var upper = points[len(points)-2]
+	log.Println("Starting convex hull")
 	// Run lower and upper parts in parallel
+	var lower = points[:2]
+	var upper = points[len(points)-2:]
 	w.Add(2)
 	// lower part
 	go func() {
 		for _, p := range points[2:] {
 			m := len(lower)
 			for m > 1 && !isOrientationPositive(lower[m-2], lower[m-1], p) {
-				m -= 1
 				lower = lower[:m-1]
+				m -= 1
 			}
 			lower = append(lower, p)
+		}
+
+		for _, p := range(lower) {
+			fmt.Print("lower")
+			fmt.Println(p.getCoordinates())
 		}
 		w.Done()
 	}()
@@ -46,14 +54,29 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 			p := points[i]
 			m := len(upper)
 			for m > 1 && !isOrientationPositive(upper[m-2], upper[m-1], p) {
-				m -= 1
 				upper = upper[:m-1]
+				m -= 1
 			}
 			upper = append(upper, p)
+
+		}
+
+		for _, p := range(lower) {
+			fmt.Print("upper")
+			fmt.Println(p.getCoordinates())
 		}
 		w.Done()
 	}()
 	w.Wait()
+
+	for _, p := range(lower) {
+		log.Print("lower after")
+		log.Println(p.getCoordinates())
+	}
+	for _, p := range(lower) {
+		log.Print("upper after")
+		log.Println(p.getCoordinates())
+	}
 	// End points are duplicated
 	upper = upper[:len(upper)-1]
 	lower = lower[:len(lower)-1]
