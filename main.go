@@ -5,8 +5,6 @@ package go_convex_hull_2d
 import (
 	"sort"
 	"sync"
-	"log"
-	"fmt"
 )
 
 type Point interface {
@@ -26,7 +24,6 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 		return points
 	}
 	var w sync.WaitGroup
-	log.Println("Starting convex hull")
 	// Run lower and upper parts in parallel
 	var lower = []Point{points[0], points[1]}
 	var upper = []Point{points[len(points)- 1], points[len(points)-2]}
@@ -42,10 +39,6 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 			lower = append(lower, p)
 		}
 
-		for _, p := range(lower) {
-			fmt.Print("lower")
-			fmt.Println(p.getCoordinates())
-		}
 		w.Done()
 	}()
 	// upper part
@@ -60,27 +53,14 @@ func ComputeConvexHullOnSortedArray(points []Point) []Point {
 			upper = append(upper, p)
 
 		}
-
-		for _, p := range(lower) {
-			fmt.Print("upper")
-			fmt.Println(p.getCoordinates())
-		}
 		w.Done()
 	}()
 	w.Wait()
 
-	for _, p := range(lower) {
-		log.Print("lower after")
-		log.Println(p.getCoordinates())
-	}
-	for _, p := range(lower) {
-		log.Print("upper after")
-		log.Println(p.getCoordinates())
-	}
 	// End points are duplicated
 	upper = upper[:len(upper)-1]
 	lower = lower[:len(lower)-1]
-	return append(upper, lower...)
+	return append(lower, upper...)
 }
 
 func isOrientationPositive(p1, p2, p3 Point) (isPositive bool) {

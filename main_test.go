@@ -3,12 +3,26 @@ package go_convex_hull_2d
 import (
 	"testing"
 	"fmt"
+	"math/rand"
 )
 
 func TestConvexHull (t *testing.T) {
 	points := toPoints([]float64{0,0,1,1,1,0,0.5,0.5,0.7,0.1})
 	convexHull := ComputeConvexHull(points)
 	compareConvexHulls(t, convexHull, toPoints([]float64{0, 0, 1, 0, 1, 1}))
+
+	points = toPoints([]float64{0,0, 1,0, 1,1, 0,1})
+	convexHull = ComputeConvexHull(points)
+	compareConvexHulls(t, convexHull, toPoints([]float64{0,0, 1,0, 1,1, 0, 1}))
+
+	for i:= 0; i < 1000; i++ {
+		points = append(points, point{rand.Float64(), rand.Float64()})
+	}
+	convexHull = ComputeConvexHull(points)
+	compareConvexHulls(t, convexHull, toPoints([]float64{0,0, 1,0, 1,1, 0, 1}))
+
+	// TODO degenerate cases
+
 }
 
 func compareConvexHulls (t *testing.T, actualC, expectedC []Point) {
