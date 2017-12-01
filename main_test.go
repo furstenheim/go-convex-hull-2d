@@ -35,8 +35,8 @@ func compareConvexHulls (t *testing.T, actualC, expectedC []Point) {
 	}
 	for i, p1 := range(actualC) {
 		p2 := expectedC[i]
-		x1, y1 := p1.getCoordinates()
-		x2, y2 := p2.getCoordinates()
+		x1, y1 := p1.GetCoordinates()
+		x2, y2 := p2.GetCoordinates()
 		if ( x1 != x2 || y1 != y2) {
 			fmt.Println(actualC, expectedC)
 			t.Errorf("%d th point of the convex hull was not correct, got: %+v want: %+v", i, p1, p2)
@@ -48,7 +48,7 @@ type point struct {
 	x, y float64
 }
 
-func (p point) getCoordinates () (x, y float64) {
+func (p point) GetCoordinates () (x, y float64) {
 	return p.x, p.y
 }
 

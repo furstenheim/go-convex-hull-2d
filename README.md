@@ -11,7 +11,7 @@ Implementation of convex hull using monotone chain algorithm. The order is `O(nl
         	x, y float64
         }
 
-        func (p point) getCoordinates () (x, y float64) {
+        func (p point) GetCoordinates () (x, y float64) {
         	return p.x, p.y
         }
 
