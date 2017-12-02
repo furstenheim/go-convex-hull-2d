@@ -6,16 +6,16 @@
 package go_convex_hull_2d
 
 import (
+	"log"
 	"sort"
 	"sync"
-	"log"
 )
 
 // Interface abstracting the necessary methods of a point array
 type Interface interface {
-	Take (i int) Point // Retrieve point at position i
-	Len() int // Number of elements
-	Swap(i, j int) // Swap elements with indexes i and j
+	Take(i int) Point         // Retrieve point at position i
+	Len() int                 // Number of elements
+	Swap(i, j int)            // Swap elements with indexes i and j
 	Slice(i, j int) Interface //Slice the interface between two indices
 }
 
@@ -27,20 +27,20 @@ type Point interface {
 // Auxiliary class to compute the convex hull of []Point
 type Convexer []Point
 
-func (c Convexer) Take (i int) Point {
+func (c Convexer) Take(i int) Point {
 	return c[i]
 }
 
-func (c Convexer) Len () int {
+func (c Convexer) Len() int {
 	return len(c)
 }
 
-func (c Convexer) Swap (i, j int) {
+func (c Convexer) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 
-func (c Convexer) Slice (i, j int) Interface {
-	return c[i: j]
+func (c Convexer) Slice(i, j int) Interface {
+	return c[i:j]
 }
 
 // Given an Interface computes the convex hull
@@ -62,7 +62,7 @@ func ComputeConvexHullOnSortedArray(points Interface) Interface {
 	w.Add(2)
 	// lower part
 	go func() {
-		for i := 2; i < n; i++{
+		for i := 2; i < n; i++ {
 			p := points.Take(i)
 			m := len(lowerIndexes)
 			for m > 1 && !isOrientationPositive(points.Take(lowerIndexes[m-2]), points.Take(lowerIndexes[m-1]), p) {
@@ -101,7 +101,7 @@ func ComputeConvexHullOnSortedArray(points Interface) Interface {
 		orderMap[j] = i
 	}
 	// mark all other points as bigger
-	for i := 0; i < n; i ++ {
+	for i := 0; i < n; i++ {
 		_, ok := orderMap[i]
 		if !ok {
 			orderMap[i] = len(allIndexes)
@@ -138,11 +138,11 @@ func (s pointSorter) Less(i, j int) bool {
 	return false
 }
 
-func (s pointSorter) Swap (i, j int) {
+func (s pointSorter) Swap(i, j int) {
 	s.i.Swap(i, j)
 }
 
-func (s pointSorter) Len () int {
+func (s pointSorter) Len() int {
 	return s.i.Len()
 }
 
@@ -151,11 +151,11 @@ type byMap struct {
 	m map[int]int
 }
 
-func (o byMap) Len () int {
+func (o byMap) Len() int {
 	return o.i.Len()
 }
 
-func (o byMap) Less (i, j int) bool {
+func (o byMap) Less(i, j int) bool {
 	i1, ok1 := o.m[i]
 	i2, ok2 := o.m[j]
 	if !ok1 || !ok2 {
@@ -165,7 +165,7 @@ func (o byMap) Less (i, j int) bool {
 }
 
 // When swapping elements we must update the map
-func (o byMap) Swap (i, j int) {
+func (o byMap) Swap(i, j int) {
 	i1, ok1 := o.m[i]
 	i2, ok2 := o.m[j]
 	if !ok1 || !ok2 {
