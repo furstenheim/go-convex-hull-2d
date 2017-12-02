@@ -9,7 +9,6 @@ import (
 	"sort"
 	"sync"
 	"log"
-	"fmt"
 )
 
 // Interface abstracting the necessary methods of a point array
@@ -96,7 +95,6 @@ func ComputeConvexHullOnSortedArray(points Interface) Interface {
 	lowerIndexes = lowerIndexes[:len(lowerIndexes)-1]
 	allIndexes := append(lowerIndexes, upperIndexes...)
 
-	fmt.Println("All indices", allIndexes)
 	// Now sort Interface leaving first the indexes we are interested in
 	var orderMap = make(map[int]int, n)
 	for i, j := range allIndexes {
