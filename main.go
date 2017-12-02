@@ -44,13 +44,13 @@ func (c Convexer) Slice(i, j int) Interface {
 }
 
 // Given an Interface computes the convex hull
-func ComputeConvexHull(points Interface) Interface {
+func New(points Interface) Interface {
 	sort.Sort(pointSorter{i: points})
-	return ComputeConvexHullOnSortedArray(points)
+	return NewFromSortedArray(points)
 }
 
 // Given an Interface which is already ordered in lexicographical order by (x,y) it computes the convex hull
-func ComputeConvexHullOnSortedArray(points Interface) Interface {
+func NewFromSortedArray(points Interface) Interface {
 	n := points.Len()
 	if n < 3 {
 		return points

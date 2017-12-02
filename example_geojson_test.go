@@ -22,7 +22,7 @@ func (c coordinates) Slice(i, j int) Interface {
 
 func ExampleComputeConvexHull_coordinates() {
 	points := coordinates{{0, 0}, {0, 1}, {1, 1}, {1 / 2, 1 / 2}}
-	convexHull := ComputeConvexHull(points)
+	convexHull := New(points)
 	fmt.Println(convexHull)
 	// Output: [[0 0] [1 1] [0 1]]
 }

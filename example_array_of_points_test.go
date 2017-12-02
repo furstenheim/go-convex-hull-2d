@@ -4,7 +4,7 @@ import "fmt"
 
 func ExampleComputeConvexHull_array_of_points() {
 	points := []Point{point{0, 0}, point{0, 1}, point{1, 1}, point{1 / 2, 1 / 2}}
-	convexHull := ComputeConvexHull(Convexer(points))
+	convexHull := New(Convexer(points))
 	fmt.Println(convexHull)
 	// Output: [{0 0} {1 1} {0 1}]
 }
