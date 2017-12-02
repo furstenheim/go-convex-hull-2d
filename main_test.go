@@ -8,24 +8,24 @@ import (
 
 func TestConvexHull (t *testing.T) {
 	points := toPoints([]float64{0,0,1,1,1,0,0.5,0.5,0.7,0.1})
-	convexHull := ComputeConvexHull(points)
+	convexHull := ComputeConvexHull(points).(Convexer)
 	compareConvexHulls(t, convexHull, toPoints([]float64{0, 0, 1, 0, 1, 1}))
 
 	points = toPoints([]float64{0,0, 1,0, 1,1, 0,1})
-	convexHull = ComputeConvexHull(points)
+	convexHull = ComputeConvexHull(points).(Convexer)
 	compareConvexHulls(t, convexHull, toPoints([]float64{0,0, 1,0, 1,1, 0, 1}))
 
 	for i:= 0; i < 1000; i++ {
 		points = append(points, point{rand.Float64(), rand.Float64()})
 	}
-	convexHull = ComputeConvexHull(points)
+	convexHull = ComputeConvexHull(points).(Convexer)
 	compareConvexHulls(t, convexHull, toPoints([]float64{0,0, 1,0, 1,1, 0, 1}))
 
 	// TODO degenerate cases
 
 }
 
-func compareConvexHulls (t *testing.T, actualC, expectedC []Point) {
+func compareConvexHulls (t *testing.T, actualC, expectedC Convexer) {
 	if (len(actualC) != len(expectedC)) {
 		t.Errorf("Convex hull didn't correct length, got %d, want: %d", len(actualC), len(expectedC))
 		for _, p := range(actualC) {
@@ -52,11 +52,11 @@ func (p point) GetCoordinates () (x, y float64) {
 	return p.x, p.y
 }
 
-func toPoints (ps []float64) (o []Point) {
+func toPoints (ps []float64) (o Convexer) {
 	o = make([]Point, len(ps) / 2)
 	for i := 0; i < len(ps); i+= 2{
 		o[i/2] = point{ps[i], ps[i+1]}
 	}
-	return o
+	return Convexer(o)
 }
 
