@@ -4,8 +4,8 @@ import "fmt"
 
 type coordinates [][2]float64
 
-func (c coordinates) Take(i int) Point {
-	return point{c[i][0], c[i][1]}
+func (c coordinates) Take(i int) (x, y float64) {
+	return c[i][0], c[i][1]
 }
 
 func (c coordinates) Len() int {

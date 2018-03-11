@@ -13,35 +13,12 @@ import (
 
 // Interface abstracting the necessary methods of a point array
 type Interface interface {
-	Take(i int) Point         // Retrieve point at position i
+	Take(i int) (x, y float64)         // Retrieve point at position i
 	Len() int                 // Number of elements
 	Swap(i, j int)            // Swap elements with indexes i and j
 	Slice(i, j int) Interface //Slice the interface between two indices
 }
 
-// A point basically returns coordinates
-type Point interface {
-	GetCoordinates() (float64, float64)
-}
-
-// Auxiliary class to compute the convex hull of []Point
-type Convexer []Point
-
-func (c Convexer) Take(i int) Point {
-	return c[i]
-}
-
-func (c Convexer) Len() int {
-	return len(c)
-}
-
-func (c Convexer) Swap(i, j int) {
-	c[i], c[j] = c[j], c[i]
-}
-
-func (c Convexer) Slice(i, j int) Interface {
-	return c[i:j]
-}
 
 // Given an Interface computes the convex hull
 func New(points Interface) Interface {
@@ -61,11 +38,16 @@ func NewFromSortedArray(points Interface) Interface {
 	var upperIndexes = []int{n - 1, n - 2}
 	w.Add(2)
 	// lower part
-	go func() {
+	func() {
 		for i := 2; i < n; i++ {
-			p := points.Take(i)
+			x, y := points.Take(i)
 			m := len(lowerIndexes)
-			for m > 1 && !isOrientationPositive(points.Take(lowerIndexes[m-2]), points.Take(lowerIndexes[m-1]), p) {
+			for m > 1 {
+				x2, y2 := points.Take(lowerIndexes[m-2])
+				x3, y3 := points.Take(lowerIndexes[m-1])
+				if isOrientationPositive(x2, y2, x3, y3, x, y) {
+					break
+				}
 				lowerIndexes = lowerIndexes[:m-1]
 				m -= 1
 			}
@@ -75,11 +57,16 @@ func NewFromSortedArray(points Interface) Interface {
 		w.Done()
 	}()
 	// upper part
-	go func() {
+	func() {
 		for i := n - 3; i >= 0; i-- {
-			p := points.Take(i)
+			x, y := points.Take(i)
 			m := len(upperIndexes)
-			for m > 1 && !isOrientationPositive(points.Take(upperIndexes[m-2]), points.Take(upperIndexes[m-1]), p) {
+			for m > 1 {
+				x2, y2 := points.Take(upperIndexes[m-2])
+				x3, y3 := points.Take(upperIndexes[m-1])
+				if isOrientationPositive(x2, y2, x3, y3, x, y) {
+					break
+				}
 				upperIndexes = upperIndexes[:m-1]
 				m -= 1
 			}
@@ -112,10 +99,7 @@ func NewFromSortedArray(points Interface) Interface {
 	return points.Slice(0, len(allIndexes))
 }
 
-func isOrientationPositive(p1, p2, p3 Point) (isPositive bool) {
-	x1, y1 := p1.GetCoordinates()
-	x2, y2 := p2.GetCoordinates()
-	x3, y3 := p3.GetCoordinates()
+func isOrientationPositive(x1, y1, x2, y2, x3, y3 float64) (isPositive bool) {
 	// compute determinant to obtain the orientation
 	// |x1 - x3 x2 - x3 |
 	// |y1 - y3 y2 - y3 |
@@ -127,8 +111,8 @@ type pointSorter struct {
 }
 
 func (s pointSorter) Less(i, j int) bool {
-	x1, y1 := s.i.Take(i).GetCoordinates()
-	x2, y2 := s.i.Take(j).GetCoordinates()
+	x1, y1 := s.i.Take(i)
+	x2, y2 := s.i.Take(j)
 	if x1 < x2 {
 		return true
 	}
