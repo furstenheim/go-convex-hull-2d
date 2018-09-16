@@ -6,7 +6,6 @@
 package go_convex_hull_2d
 
 import (
-	"log"
 	"sort"
 	"sync"
 )
@@ -109,53 +108,31 @@ func (s pointSorter) Len() int {
 	return s.i.Len()
 }
 
-type byMap struct {
-	i Interface
-	m map[int]int
-}
-
-func (o byMap) Len() int {
-	return o.i.Len()
-}
-
-func (o byMap) Less(i, j int) bool {
-	i1, ok1 := o.m[i]
-	i2, ok2 := o.m[j]
-	if !ok1 || !ok2 {
-		log.Fatal("Unkown state, one index was not tracked in the map")
-	}
-	return i1 < i2
-}
-
-// When swapping elements we must update the map
-func (o byMap) Swap(i, j int) {
-	i1, ok1 := o.m[i]
-	i2, ok2 := o.m[j]
-	if !ok1 || !ok2 {
-		log.Fatal("Unkown state, one index was not tracked in the map")
-	}
-	// swap priorities
-	o.m[j] = i1
-	o.m[i] = i2
-	// swap containing slice
-	o.i.Swap(i, j)
-}
-
 func sortByIndexes (points Interface, indexes []int) Interface {
 	n := points.Len()
-	// Now sort Interface leaving first the indexes we are interested in
-	var orderMap = make(map[int]int, n)
-	for i, j := range indexes {
-		orderMap[j] = i
-	}
-	// mark all other points as bigger
-	for i := 0; i < n; i++ {
-		_, ok := orderMap[i]
+	var originalPosition2NewPosition = make(map[int]int, n)
+	var newPosition2OriginalPosition = make(map[int]int, n)
+
+
+	for positionToMove, index := range(indexes) {
+		newIndex, ok := originalPosition2NewPosition[index]
+
 		if !ok {
-			orderMap[i] = len(indexes)
+			newIndex = index
 		}
+		originalIndexAtPosition, ok2 := newPosition2OriginalPosition[positionToMove]
+		if !ok2 {
+			originalIndexAtPosition = positionToMove
+		}
+		// Move next point to the position
+		points.Swap(newIndex, positionToMove)
+
+		// Now we update values
+		newPosition2OriginalPosition[positionToMove] = index
+		newPosition2OriginalPosition[newIndex] = originalIndexAtPosition
+
+		originalPosition2NewPosition[index] = positionToMove
+		originalPosition2NewPosition[originalIndexAtPosition] = newIndex
 	}
-	bM := byMap{i: points, m: orderMap}
-	sort.Sort(bM)
 	return points.Slice(0, len(indexes))
 }

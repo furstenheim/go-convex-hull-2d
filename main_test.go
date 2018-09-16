@@ -9,8 +9,8 @@ import (
 
 func TestConvexHull(t *testing.T) {
 	points := FlatPoints([]float64{0, 0, 1, 1, 1, 0, 0.5, 0.5, 0.7, 0.1})
-	convexHull := New(points).(FlatPoints)
-	compareConvexHulls(t, convexHull, FlatPoints([]float64{0, 0, 1, 0, 1, 1}))
+ 	convexHull := New(points).(FlatPoints)
+  	compareConvexHulls(t, convexHull, FlatPoints([]float64{0, 0, 1, 0, 1, 1}))
 
 	points = FlatPoints([]float64{0, 0, 1, 0, 1, 1, 0, 1})
 	convexHull = New(points).(FlatPoints)
@@ -19,8 +19,8 @@ func TestConvexHull(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		points = append(points, rand.Float64(), rand.Float64())
 	}
-	convexHull = New(points).(FlatPoints)
-	compareConvexHulls(t, convexHull, FlatPoints([]float64{0, 0, 1, 0, 1, 1, 0, 1}))
+ 	convexHull = New(points).(FlatPoints)
+ 	compareConvexHulls(t, convexHull, FlatPoints([]float64{0, 0, 1, 0, 1, 1, 0, 1}))
 
 	// TODO degenerate cases
 
@@ -57,6 +57,12 @@ func TestSortByIndexes (t *testing.T) {
 			[]int{0, 1, 2, 3, 4, 5, 6},
 			[]int{1, 0, 2},
 			[]int{1, 0, 2},
+		},
+		{
+			"Element deferred couple of indexes",
+			[]int{0, 1, 2, 3, 4, 5, 6},
+			[]int{0, 2, 3, 1},
+			[]int{0, 2, 3, 1},
 		},
 	}
 	for _, tc := range(testCases) {
