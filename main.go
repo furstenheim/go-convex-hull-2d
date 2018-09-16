@@ -113,13 +113,7 @@ type pointSorter struct {
 func (s pointSorter) Less(i, j int) bool {
 	x1, y1 := s.i.Take(i)
 	x2, y2 := s.i.Take(j)
-	if x1 < x2 {
-		return true
-	}
-	if x1 == x2 {
-		return y1 < y2
-	}
-	return false
+	return x1 < x2 || (x1 == x2 && y1 < y2)
 }
 
 func (s pointSorter) Swap(i, j int) {
