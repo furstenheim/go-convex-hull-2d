@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConvexHull(t *testing.T) {
@@ -23,6 +24,48 @@ func TestConvexHull(t *testing.T) {
 
 	// TODO degenerate cases
 
+}
+
+
+func TestSortByIndexes (t *testing.T) {
+	testCases := []struct{
+		description string
+		original []int
+		indexes []int
+		expected []int
+	}{
+		{
+			"",
+			[]int{0, 1, 1, 2},
+			[]int{0, 1},
+			[]int{0, 1},
+		},
+		{
+			"Indexes start at middle",
+			[]int{0, 1, 1, 2, 4, 5, 6},
+			[]int{2, 3},
+			[]int{1, 2},
+		},
+		{
+			"Reversed indexes",
+			[]int{0, 1, 2, 3, 4, 5, 6},
+			[]int{3, 2},
+			[]int{3, 2},
+		},
+		{
+			"Simple swap would fail",
+			[]int{0, 1, 2, 3, 4, 5, 6},
+			[]int{1, 0, 2},
+			[]int{1, 0, 2},
+		},
+	}
+	for _, tc := range(testCases) {
+		t.Run(tc.description, func (t *testing.T) {
+			original := Interface(sortByIndexInterface(tc.original))
+			final := []int(sortByIndexes(original, tc.indexes).(sortByIndexInterface))
+			assert.Equal(t, tc.expected, final)
+		})
+	}
 }
 
 func BenchmarkConvexHull(b *testing.B) {
@@ -67,10 +110,29 @@ func compareConvexHulls(t *testing.T, actualC, expectedC FlatPoints) {
 	}
 }
 
+
 type point struct {
 	x, y float64
 }
 
 func (p point) GetCoordinates() (x, y float64) {
 	return p.x, p.y
+}
+
+type sortByIndexInterface []int
+
+func (c sortByIndexInterface) Take(i int) (x, y float64) {
+	return 0, 0
+}
+
+func (c sortByIndexInterface) Len() int {
+	return len(c)
+}
+
+func (c sortByIndexInterface) Swap(i, j int) {
+	c[i], c[j] = c[j], c[i]
+}
+
+func (c sortByIndexInterface) Slice(i, j int) Interface {
+	return c[i:j]
 }

@@ -81,22 +81,7 @@ func NewFromSortedArray(points Interface) Interface {
 	upperIndexes = upperIndexes[:len(upperIndexes)-1]
 	lowerIndexes = lowerIndexes[:len(lowerIndexes)-1]
 	allIndexes := append(lowerIndexes, upperIndexes...)
-
-	// Now sort Interface leaving first the indexes we are interested in
-	var orderMap = make(map[int]int, n)
-	for i, j := range allIndexes {
-		orderMap[j] = i
-	}
-	// mark all other points as bigger
-	for i := 0; i < n; i++ {
-		_, ok := orderMap[i]
-		if !ok {
-			orderMap[i] = len(allIndexes)
-		}
-	}
-	bM := byMap{i: points, m: orderMap}
-	sort.Sort(bM)
-	return points.Slice(0, len(allIndexes))
+	return sortByIndexes(points, allIndexes)
 }
 
 func isOrientationPositive(x1, y1, x2, y2, x3, y3 float64) (isPositive bool) {
@@ -154,4 +139,23 @@ func (o byMap) Swap(i, j int) {
 	o.m[i] = i2
 	// swap containing slice
 	o.i.Swap(i, j)
+}
+
+func sortByIndexes (points Interface, indexes []int) Interface {
+	n := points.Len()
+	// Now sort Interface leaving first the indexes we are interested in
+	var orderMap = make(map[int]int, n)
+	for i, j := range indexes {
+		orderMap[j] = i
+	}
+	// mark all other points as bigger
+	for i := 0; i < n; i++ {
+		_, ok := orderMap[i]
+		if !ok {
+			orderMap[i] = len(indexes)
+		}
+	}
+	bM := byMap{i: points, m: orderMap}
+	sort.Sort(bM)
+	return points.Slice(0, len(indexes))
 }
