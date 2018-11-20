@@ -108,31 +108,31 @@ func (s pointSorter) Len() int {
 	return s.i.Len()
 }
 
-func sortByIndexes (points Interface, indexes []int) Interface {
-	n := points.Len()
-	var originalPosition2NewPosition = make(map[int]int, n)
-	var newPosition2OriginalPosition = make(map[int]int, n)
-
-
-	for positionToMove, index := range(indexes) {
-		newIndex, ok := originalPosition2NewPosition[index]
-
-		if !ok {
-			newIndex = index
-		}
-		originalIndexAtPosition, ok2 := newPosition2OriginalPosition[positionToMove]
-		if !ok2 {
-			originalIndexAtPosition = positionToMove
-		}
-		// Move next point to the position
-		points.Swap(newIndex, positionToMove)
-
-		// Now we update values
-		newPosition2OriginalPosition[positionToMove] = index
-		newPosition2OriginalPosition[newIndex] = originalIndexAtPosition
-
-		originalPosition2NewPosition[index] = positionToMove
-		originalPosition2NewPosition[originalIndexAtPosition] = newIndex
+func sortByIndexes (points Interface, indices []int) Interface {
+	// Reorder coordinates so index and in increasing order
+	s := indexSorter{indices: indices, points: points}
+	sort.Sort(s)
+	// Now that indices are in increasing order repacking is trivial
+	for i, index := range(indices) {
+		points.Swap(i, index)
 	}
-	return points.Slice(0, len(indexes))
+	return points.Slice(0, len(indices))
+}
+
+type indexSorter struct {
+	indices []int
+	points Interface
+}
+
+func (s indexSorter) Less(i, j int) bool {
+	return s.indices[i] < s.indices[j]
+}
+
+func (s indexSorter) Swap(i, j int) {
+	s.indices[i], s.indices[j] = s.indices[j], s.indices[i]
+	s.points.Swap(s.indices[i], s.indices[j])
+}
+
+func (s indexSorter) Len() int {
+	return len(s.indices)
 }
