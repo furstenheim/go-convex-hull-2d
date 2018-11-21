@@ -18,6 +18,12 @@ type Interface interface {
 	Slice(i, j int) Interface //Slice the interface between two indices
 }
 
+type Options struct {
+	Pool *sync.Pool
+}
+type poolElStruct struct {
+	lowerIndexes, upperIndexes []int
+}
 
 // Given an Interface computes the convex hull
 func New(points Interface) Interface {
@@ -25,16 +31,41 @@ func New(points Interface) Interface {
 	return NewFromSortedArray(points)
 }
 
-// Given an Interface which is already ordered in lexicographical order by (x,y) it computes the convex hull
 func NewFromSortedArray(points Interface) Interface {
+	o := Options{}
+	return NewFromSortedArrayWithOptions(points, o)
+}
+func NewWithOptions(points Interface, o Options) Interface {
+	sort.Sort(pointSorter{i: points})
+	return NewFromSortedArrayWithOptions(points, o)
+}
+
+// Given an Interface which is already ordered in lexicographical order by (x,y) it computes the convex hull
+func NewFromSortedArrayWithOptions(points Interface, o Options) Interface {
 	n := points.Len()
 	if n < 3 {
 		return points
 	}
 	var w sync.WaitGroup
+	var lowerIndexes []int
+	var upperIndexes []int
+	var isPooledMemReceived bool
+	if o.Pool != nil {
+		poolElCandidate := o.Pool.Get()
+		if poolElCandidate != nil {
+			isPooledMemReceived = true
+			poolEl := poolElCandidate.(*poolElStruct)
+			lowerIndexes = poolEl.lowerIndexes[0:0]
+			upperIndexes = poolEl.upperIndexes[0:0]
+		}
+	}
+	if !isPooledMemReceived {
+		lowerIndexes = make([]int, 0, 5)
+		upperIndexes = make([]int, 0, 5)
+	}
 	// Run lower and upper parts in parallel. Compute array of indices
-	var lowerIndexes = []int{0, 1}
-	var upperIndexes = []int{n - 1, n - 2}
+	lowerIndexes = append(lowerIndexes, 0, 1)
+	upperIndexes = append(upperIndexes, n - 1, n - 2)
 	w.Add(2)
 	// lower part
 	func() {
@@ -80,7 +111,12 @@ func NewFromSortedArray(points Interface) Interface {
 	upperIndexes = upperIndexes[:len(upperIndexes)-1]
 	lowerIndexes = lowerIndexes[:len(lowerIndexes)-1]
 	allIndexes := append(lowerIndexes, upperIndexes...)
-	return sortByIndexes(points, allIndexes)
+
+	result := sortByIndexes(points, allIndexes)
+	if o.Pool != nil {
+		o.Pool.Put(&poolElStruct{lowerIndexes: allIndexes, upperIndexes: upperIndexes})
+	}
+	return result
 }
 
 func isOrientationPositive(x1, y1, x2, y2, x3, y3 float64) (isPositive bool) {

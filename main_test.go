@@ -5,16 +5,27 @@ import (
 	"math/rand"
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"sync"
 )
 
 func TestConvexHull(t *testing.T) {
+	pool := &sync.Pool{}
 	points := FlatPoints([]float64{0, 0, 1, 1, 1, 0, 0.5, 0.5, 0.7, 0.1})
  	convexHull := New(points).(FlatPoints)
+	o := Options{Pool:pool}
+ 	convexHull1 := NewWithOptions(points, o).(FlatPoints)
+ 	convexHull2 := NewWithOptions(points, o).(FlatPoints)
   	compareConvexHulls(t, convexHull, FlatPoints([]float64{0, 0, 1, 0, 1, 1}))
+  	compareConvexHulls(t, convexHull1, FlatPoints([]float64{0, 0, 1, 0, 1, 1}))
+  	compareConvexHulls(t, convexHull2, FlatPoints([]float64{0, 0, 1, 0, 1, 1}))
 
 	points = FlatPoints([]float64{0, 0, 1, 0, 1, 1, 0, 1})
 	convexHull = New(points).(FlatPoints)
+	convexHull1 = NewWithOptions(points, o).(FlatPoints)
+	convexHull2 = NewWithOptions(points, o).(FlatPoints)
 	compareConvexHulls(t, convexHull, FlatPoints([]float64{0, 0, 1, 0, 1, 1, 0, 1}))
+	compareConvexHulls(t, convexHull1, FlatPoints([]float64{0, 0, 1, 0, 1, 1, 0, 1}))
+	compareConvexHulls(t, convexHull2, FlatPoints([]float64{0, 0, 1, 0, 1, 1, 0, 1}))
 
 	for i := 0; i < 1000; i++ {
 		points = append(points, rand.Float64(), rand.Float64())
@@ -93,6 +104,15 @@ func BenchmarkConvexHull(b *testing.B) {
 		b.Run(fmt.Sprintf("Convex hull of size %d", tc.size), func (b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				_ = New(FlatPoints(points)).(FlatPoints)
+			}
+		})
+		pool := &sync.Pool{}
+		o := Options{Pool:pool}
+		_ = NewWithOptions(FlatPoints(points), o).(FlatPoints)
+
+		b.Run(fmt.Sprintf("Pooled convex hull of size %d", tc.size), func (b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = NewWithOptions(FlatPoints(points), o).(FlatPoints)
 			}
 		})
 	}
